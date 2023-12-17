@@ -1,0 +1,46 @@
+import io.qameta.allure.junit4.DisplayName;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.hamcrest.Matchers;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import static io.restassured.RestAssured.given;
+
+@RunWith(Parameterized.class)
+public class OrdersCreatingTests {
+
+
+    private final Orders orders;
+
+    public OrdersCreatingTests(Orders orders) {
+        this.orders = orders;
+    }
+
+
+    @Before
+    public void start() {
+        RestAssured.baseURI = "http://qa-scooter.praktikum-services.ru";
+    }
+
+    @Parameterized.Parameters(name = "Тестовые данные: {0}")
+    public static Object[][] getTestData() {
+        return new Object[][]{{new Orders("Вассисуалий", "Зенбельшухер", "ул.Ленина 153",
+                "Тверская", "+78887776665", 3, "2023-12-16", "обязательно надуть в колёса",
+                new String[]{"BLACK"})}, {new Orders("Анисим", "Крюк", "ул.Пушкина 21", "Сокольники",
+                "+78887776666", 4, "2023-12-17", "без комментариев и камеру выключи", new String[]{"GREY"})},
+                {new Orders("Гамбас", "Апердулаев", "ул.Калинина 42", "Белорусская",
+                        "+78887776667", 6, "2023-12-18", "", new String[]{"BLACK", "GREY"})},
+                {new Orders("Анфиса", "Моргунова", "ул.Проспект Космонавтов 18", "Динамо",
+                        "+78887776668", 3, "2023-12-19", "", new String[]{})},};
+    }
+
+    @Test
+    @DisplayName("Проверка создания заказа с использованием массива данных")
+    public void verifyCreateOrder() {
+        Response response = given().log().all().header("Content-type", "application/json").body(orders).when().post("/api/v1/orders");
+        response.then().log().all().assertThat().and().statusCode(201).body("track", Matchers.notNullValue());
+    }
+}
