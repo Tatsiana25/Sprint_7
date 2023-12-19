@@ -8,9 +8,13 @@ import org.junit.Test;
 
 public class CourierCreatingTests {
 
+    private CourierItem courierItem;
+    private String createdCourierId;
+
     @Before
     public void start() {
         RestAssured.baseURI = "https://qa-scooter.praktikum-services.ru";
+        courierItem = new CourierItem();
     }
 
     @Test
@@ -22,6 +26,10 @@ public class CourierCreatingTests {
         String firstName = RandomStringUtils.randomAlphabetic(2, 18);
         Response postRequestCreateCourier = courierItem.getRequestCreateCourier(new Courier(login, password, firstName));
         postRequestCreateCourier.then().log().all().assertThat().statusCode(201).and().body("ok", Matchers.is(true));
+
+        createdCourierId = courierItem.getRequestCourierLogin(new Courier(login, password)).jsonPath().getString("id");
+        ;
+        courierItem.deleteCourierById(createdCourierId);
     }
 
     @Test
