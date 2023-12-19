@@ -28,7 +28,6 @@ public class CourierCreatingTests {
         postRequestCreateCourier.then().log().all().assertThat().statusCode(201).and().body("ok", Matchers.is(true));
 
         createdCourierId = courierItem.getRequestCourierLogin(new Courier(login, password)).jsonPath().getString("id");
-        ;
         courierItem.deleteCourierById(createdCourierId);
     }
 
