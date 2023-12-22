@@ -3,6 +3,7 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,10 +18,16 @@ public class CourierCreatingTests {
         courierItem = new CourierItem();
     }
 
+    @After
+    public void deleteCourier() {
+        if (createdCourierId != null) {
+            courierItem.deleteCourierById(createdCourierId);
+        }
+    }
+
     @Test
     @DisplayName("Создание курьера /api/v1/courier")
     public void createCourierTest() {
-        CourierItem courierItem = new CourierItem();
         String login = RandomStringUtils.randomAlphanumeric(2, 15);
         String password = RandomStringUtils.randomAlphanumeric(7, 15);
         String firstName = RandomStringUtils.randomAlphabetic(2, 18);
@@ -28,7 +35,6 @@ public class CourierCreatingTests {
         postRequestCreateCourier.then().log().all().assertThat().statusCode(201).and().body("ok", Matchers.is(true));
 
         createdCourierId = courierItem.getRequestCourierLogin(new Courier(login, password)).jsonPath().getString("id");
-        courierItem.deleteCourierById(createdCourierId);
     }
 
     @Test

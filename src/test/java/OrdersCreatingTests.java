@@ -1,7 +1,6 @@
-import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
-import io.restassured.response.Response;
 import org.hamcrest.Matchers;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,11 +13,11 @@ public class OrdersCreatingTests {
 
 
     private final Orders orders;
+    private static String createdOrderId;
 
     public OrdersCreatingTests(Orders orders) {
         this.orders = orders;
     }
-
 
     @Before
     public void start() {
@@ -38,9 +37,17 @@ public class OrdersCreatingTests {
     }
 
     @Test
-    @DisplayName("Проверка создания заказа с использованием массива данных")
     public void verifyCreateOrder() {
-        Response response = given().log().all().header("Content-type", "application/json").body(orders).when().post("/api/v1/orders");
-        response.then().log().all().assertThat().and().statusCode(201).body("track", Matchers.notNullValue());
+        createdOrderId = given().log().all().header("Content-type", "application/json").body(orders).when().post("/api/v1/orders")
+                .then().log().all().assertThat().and().statusCode(201).body("track", Matchers.notNullValue())
+                .extract().jsonPath().getString("id");
+    }
+
+
+    @AfterClass
+    public static void tearDown() {
+        if (createdOrderId != null) {
+            given().pathParam("id", createdOrderId).when().delete("/api/v1/orders/{id}").then().log().all().statusCode(200);
+        }
     }
 }
